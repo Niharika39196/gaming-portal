@@ -1,0 +1,337 @@
+/* Global Styles & Variables */
+:root {
+    --primary-color: #007bff; /* Blue accent */
+    --secondary-color: #dc3545; /* Red accent for CTAs */
+    --background-dark: #1a1a2e; /* Dark background */
+    --background-light: #2c2c44; /* Slightly lighter background for cards/sections */
+    --text-light: #f4f4f4; /* Light text */
+    --text-grey: #aaaaaa; /* Greyed out text */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-dark);
+    color: var(--text-light);
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header & Navigation */
+.main-header {
+    background-color: #161625;
+    padding: 15px 0;
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.main-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.main-header h1 {
+    font-size: 2em;
+    color: var(--primary-color);
+    letter-spacing: 1px;
+}
+
+.main-nav a {
+    color: var(--text-light);
+    text-decoration: none;
+    margin: 0 15px;
+    font-weight: 700;
+    transition: color 0.3s;
+}
+
+.main-nav a:hover {
+    color: var(--primary-color);
+}
+
+.cta-button {
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+    border: none;
+    padding: 8px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 700;
+    transition: background-color 0.3s;
+}
+
+.cta-button:hover {
+    background-color: #a02937; /* Darker red */
+}
+
+/* Section Styling */
+section {
+    padding: 40px 0;
+}
+
+.section-title {
+    font-size: 2.2em;
+    margin-bottom: 30px;
+    color: var(--text-light);
+    text-align: center;
+}
+
+hr {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, rgba(0, 0, 0, 0), var(--primary-color), rgba(0, 0, 0, 0));
+    margin: 20px 0;
+}
+
+/* Featured Content */
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.card {
+    background-color: var(--background-light);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    border-bottom: 3px solid var(--primary-color);
+}
+
+.card h3 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.card-cta {
+    display: inline-block;
+    background-color: var(--secondary-color);
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    margin-top: 15px;
+    font-weight: 700;
+}
+
+/* NEW GAME SHOWCASE STYLES */
+
+.section-my-game {
+    padding: 60px 0;
+}
+
+.game-banner {
+    background: linear-gradient(135deg, #1f1f3f, #3a0e4a); /* Gradient background for impact */
+    padding: 40px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+    border: 3px solid var(--secondary-color); /* Red border for attention */
+}
+
+.game-banner h3 {
+    font-size: 2.5em;
+    color: var(--text-light);
+    margin-bottom: 10px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+}
+
+.game-banner p {
+    font-size: 1.2em;
+    color: var(--text-grey);
+    margin-bottom: 30px;
+}
+
+.large-cta {
+    font-size: 1.3em;
+    padding: 15px 40px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.large-cta:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px var(--secondary-color);
+}
+
+/* Explore Categories */
+.explore-categories {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.category-item {
+    background-color: var(--background-light);
+    padding: 20px;
+    border-radius: 8px;
+    width: 22%; /* Adjust width for 4 columns */
+    min-width: 200px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.category-item h4 {
+    color: var(--text-light);
+    font-size: 1.4em;
+    margin-bottom: 10px;
+}
+
+/* News List */
+.news-list {
+    list-style: none;
+    padding: 0;
+}
+
+.news-list li {
+    background-color: var(--background-light);
+    margin-bottom: 10px;
+    padding: 15px;
+    border-left: 5px solid var(--primary-color);
+    border-radius: 4px;
+}
+
+/* Community Section */
+.community-links {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin: 20px 0 40px;
+}
+
+.community-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: 700;
+    padding: 10px 20px;
+    border: 2px solid var(--primary-color);
+    border-radius: 50px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.community-links a:hover {
+    background-color: var(--primary-color);
+    color: var(--background-dark);
+}
+
+.signup-banner {
+    background-color: #3e0c4a; /* A darker purple/accent color */
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    margin-top: 30px;
+    border: 2px dashed var(--secondary-color);
+}
+
+.signup-banner p {
+    font-size: 1.3em;
+    margin-bottom: 20px;
+}
+
+.cta-button.large {
+    font-size: 1.2em;
+    padding: 12px 30px;
+}
+
+/* Footer */
+footer {
+    background-color: #11111a;
+    color: var(--text-grey);
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 30px;
+}
+
+/* ======================================= */
+/* 📱 RESPONSIVE MEDIA QUERIES 💻 */
+/* ======================================= */
+
+/* 1. Tablet View (Max Width 992px) */
+@media (max-width: 992px) {
+    .section-title {
+        font-size: 1.8em;
+    }
+
+    .main-nav a {
+        margin: 0 10px;
+    }
+
+    /* Explore categories shrink to two per row */
+    .explore-categories {
+        justify-content: space-around;
+    }
+    .category-item {
+        width: 45%; 
+        margin-bottom: 20px;
+    }
+}
+
+
+/* 2. Mobile View (Max Width 600px) */
+@media (max-width: 600px) {
+    
+    /* Header Stack: Stack logo and nav vertically */
+    .main-header .container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .main-nav {
+        margin-top: 15px;
+        display: flex;
+        flex-direction: column; /* Stack links vertically */
+        gap: 10px;
+    }
+
+    .main-nav a, .cta-button {
+        display: block; /* Make links and button full width */
+        width: 100%;
+        margin: 0;
+    }
+    
+    .cta-button {
+        margin-top: 10px;
+    }
+
+    /* Full Width for Featured Cards */
+    .featured-grid {
+        grid-template-columns: 1fr; /* Single column layout */
+    }
+
+    /* Full Width for Explore Categories */
+    .category-item {
+        width: 100%; 
+    }
+
+    /* Stack Community Links */
+    .community-links {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .game-banner {
+        padding: 30px 15px;
+    }
+    
+    .game-banner h3 {
+        font-size: 2em;
+    }
+}
