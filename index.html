@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Collect the Stars — Mini HTML5 Game</title>
+<style>
+  :root{
+    --bg:#071022; --panel:#0b2033; --accent:#ffce47; --player:#4de68a; --text:#e6f0fb;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:linear-gradient(180deg,#05101a 0%, #072033 100%);color:var(--text)}
+  .wrap{max-width:980px;margin:18px auto;padding:16px}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+  header h1{font-size:1.1rem;margin:0}
+  header .controls{display:flex;gap:10px;align-items:center}
+  button{background:var(--accent);border:0;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
+  .panel{background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;display:flex;gap:14px;align-items:center}
+  #game-area{margin-top:12px;border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.03);display:flex;justify-content:center}
+  canvas{display:block;background:#081428;max-width:100%;height:auto}
+  .hud{display:flex;gap:12px;align-items:center}
+  .badge{background:rgba(255,255,255,0.03);padding:6px 10px;border-radius:8px}
+  .mobile-cta{display:none;margin-left:8px;padding:6px 8px;background:transparent;border:1px solid rgba(255,255,255,0.06);border-radius:8px;color:var(--text)}
+  @media(max-width:700px){
+    header{flex-direction:column;align-items:flex-start;gap:10px}
+    .mobile-cta{display:inline-block}
+  }
+  /* simple overlay message */
+  .overlay{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+  .msg{background:linear-gradient(180deg, rgba(8,18,30,0.95), rgba(6,12,20,0.9));padding:18px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.6);text-align:center}
+  .msg h2{margin:0 0 6px 0}
+  .msg p{margin:0 0 8px 0;color:#9fb0c7}
+  .touch-ctr{display:none;position:relative;margin-top:10px}
+  .touch-row{display:flex;gap:8px;justify-content:center}
+  .touch-btn{padding:12px;border-radius:8px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.02);min-width:60px;text-align:center}
+  @media(max-width:700px){ .touch-ctr{display:block} }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Collect the Stars — Mini HTML5 Game</h1>
+      <div class="controls">
+        <div class="hud">
+          <div class="badge">Score: <strong id="score">0</strong></div>
+          <div class="badge">Lives: <strong id="lives">3</strong></div>
+        </div>
+        <button id="restart">Restart</button>
+        <button id="fullscreen" class="mobile-cta">Fullscreen</button>
+      </div>
+    </header>
+
+    <div class="panel">
+      <div style="flex:1">
+        <small>Use arrow keys to move. On mobile, use the touch buttons below. Collect yellow stars — avoid red enemies. Score increases when you collect a star.</small>
+      </div>
+      <div style="width:180px;text-align:right;font-size:0.9rem;color:#9fb0c7">
+        Hosted-ready: drag & drop to Netlify
+      </div>
+    </div>
+
+    <div id="game-area">
+      <canvas id="game" width="800" height="480"></canvas>
+    </div>
+
+    <div class="touch-ctr" aria-hidden="true">
+      <div class="touch-row">
+        <div class="touch-btn" data-dir="left">◀</div>
+        <div class="touch-btn" data-dir="up">▲</div>
+        <div class="touch-btn" data-dir="down">▼</div>
+        <div class="touch-btn" data-dir="right">▶</div>
+      </div>
+    </div>
+
+    <div style="height:12px"></div>
+    <footer style="text-align:center;color:#9fb0c7;font-size:0.9rem">Tip: If iframe is blank when embedding, use the direct Netlify URL (some hosts block embedding).</footer>
+  </div>
+
+<script>
+/* --- Simple Collect-the-Star Game --- */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+let W = canvas.width, H = canvas.height;
+
+let score = 0, lives = 3, running = true;
+const player = {x:80, y:H/2, w:28, h:28, speed:6};
+const stars = [];
+const enemies = [];
+const maxStars = 5;
+const maxEnemies = 3;
+const spawnInterval = 1600; // ms
+
+const scoreEl = document.getElementById('score');
+const livesEl = document.getElementById('lives');
+const restartBtn = document.getElementById('restart');
+const fullscreenBtn = document.getElementById('fullscreen');
+
+function rand(min,max){ return Math.random()*(max-min)+min; }
+
+function spawnStar(){
+  if(stars.length >= maxStars) return;
+  stars.push({
+    x: rand(120, W-40),
+    y: rand(40, H-40),
+    r: 10,
+    wobble: rand(0,Math.PI*2)
+  });
+}
+
+function spawnEnemy(){
+  if(enemies.length >= maxEnemies) return;
+  const fromLeft = Math.random() < 0.5;
+  enemies.push({
+    x: fromLeft ? -30 : W+30,
+    y: rand(40,H-40),
+    vx: fromLeft ? rand(1.5,3.2) : rand(-3.2,-1.5),
+    r: 16
+  });
+}
+
+function resetGame(){
+  score = 0; lives = 3; running = true;
+  player.x = 80; player.y = H/2;
+  stars.length = 0; enemies.length = 0;
+  scoreEl.textContent = score; livesEl.textContent = lives;
+}
+restartBtn.addEventListener('click', () => resetGame());
+fullscreenBtn.addEventListener('click', () => {
+  if(document.fullscreenElement) document.exitFullscreen();
+  else canvas.requestFullscreen();
+});
+
+// input
+const keys = {};
+window.addEventListener('keydown',e=>{ keys[e.key] = true; });
+window.addEventListener('keyup',e=>{ keys[e.key] = false; });
+
+// touch buttons
+document.querySelectorAll('.touch-btn').forEach(btn=>{
+  btn.addEventListener('touchstart', e=>{
+    e.preventDefault();
+    keys['touch:'+btn.dataset.dir] = true;
+  });
+  btn.addEventListener('touchend', e=>{
+    e.preventDefault();
+    keys['touch:'+btn.dataset.dir] = false;
+  });
+  btn.addEventListener('mousedown', e=>{
+    keys['touch:'+btn.dataset.dir] = true;
+  });
+  btn.addEventListener('mouseup', e=>{
+    keys['touch:'+btn.dataset.dir] = false;
+  });
+});
+
+function update(dt){
+  if(!running) return;
+  // movement: arrow keys or touch buttons
+  let dx=0, dy=0;
+  if(keys['ArrowLeft'] || keys['a'] || keys['touch:left']) dx -= 1;
+  if(keys['ArrowRight'] || keys['d'] || keys['touch:right']) dx += 1;
+  if(keys['ArrowUp'] || keys['w'] || keys['touch:up']) dy -= 1;
+  if(keys['ArrowDown'] || keys['s'] || keys['touch:down']) dy += 1;
+
+  player.x += dx * player.speed;
+  player.y += dy * player.speed;
+
+  // clamp
+  player.x = Math.max(12, Math.min(W - 12 - player.w, player.x));
+  player.y = Math.max(12, Math.min(H - 12 - player.h, player.y));
+
+  // enemies move
+  for(let i=enemies.length-1;i>=0;i--){
+    const e = enemies[i];
+    e.x += e.vx;
+    // bounce vertically slightly
+    e.y += Math.sin(Date.now()/300 + i) * 0.6;
+    if(e.x < -60 || e.x > W+60) enemies.splice(i,1);
+  }
+
+  // check collisions with stars
+  for(let i=stars.length-1;i>=0;i--){
+    const s = stars[i];
+    s.wobble += 0.08;
+    const sx = s.x, sy = s.y;
+    if(dist(player.x + player.w/2, player.y + player.h/2, sx, sy) < s.r + 16){
+      stars.splice(i,1);
+      score += 10;
+      scoreEl.textContent = score;
+      // small chance to spawn a new enemy
+      if(Math.random() < 0.3) spawnEnemy();
+    }
+  }
+
+  // collisions with enemies
+  for(let i=enemies.length-1;i>=0;i--){
+    const e = enemies[i];
+    if(dist(player.x + player.w/2, player.y + player.h/2, e.x, e.y) < e.r + 16){
+      // hit!
+      enemies.splice(i,1);
+      lives -= 1;
+      livesEl.textContent = lives;
+      if(lives <= 0){
+        running = false;
+        showGameOver();
+      }
+    }
+  }
+}
+
+function dist(ax,ay,bx,by){ return Math.hypot(ax-bx, ay-by); }
+
+function draw(){
+  // background
+  ctx.clearRect(0,0,W,H);
+  // subtle grid
+  ctx.fillStyle = '#071b2a';
+  ctx.fillRect(0,0,W,H);
+
+  // draw stars
+  for(const s of stars){
+    const wob = Math.sin(s.wobble) * 3;
+    drawStar(s.x, s.y + wob, s.r, '#ffd54d');
+  }
+
+  // draw player
+  ctx.fillStyle = '#4de68a';
+  roundRect(ctx, player.x, player.y, player.w, player.h, 6, true);
+
+  // draw enemies
+  for(const e of enemies){
+    drawCircle(e.x, e.y, e.r, '#ff6b6b');
+  }
+
+  // top HUD transparent
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  ctx.fillRect(8,8,120,34);
+}
+
+function drawStar(cx, cy, r, color){
+  ctx.save();
+  ctx.translate(cx,cy);
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  for(let i=0;i<5;i++){
+    ctx.lineTo(Math.cos((18+72*i)/180*Math.PI)*r, -Math.sin((18+72*i)/180*Math.PI)*r);
+    ctx.lineTo(Math.cos((54+72*i)/180*Math.PI)*(r*0.45), -Math.sin((54+72*i)/180*Math.PI)*(r*0.45));
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawCircle(x,y,r,color){
+  ctx.beginPath();
+  ctx.fillStyle = color;
+  ctx.arc(x,y,r,0,Math.PI*2);
+  ctx.fill();
+}
+
+function roundRect(ctx,x,y,w,h,r,fill){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+  if(fill) ctx.fill();
+}
+
+let last = 0;
+function loop(ts){
+  const dt = ts - last;
+  last = ts;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+
+function showGameOver(){
+  // small overlay message using DOM
+  const overlay = document.createElement('div');
+  overlay.className = 'overlay';
+  overlay.style.pointerEvents = 'auto';
+  const msg = document.createElement('div');
+  msg.className = 'msg';
+  msg.innerHTML = `<h2>Game Over</h2><p>Your score: <strong>${score}</strong></p><div style="margin-top:10px"><button id="try-again">Play Again</button></div>`;
+  overlay.appendChild(msg);
+  document.body.appendChild(overlay);
+  document.getElementById('try-again').addEventListener('click', ()=>{
+    document.body.removeChild(overlay);
+    resetGame();
+  });
+}
+
+let spawnTimer = 0;
+function gameLoopTick(){
+  // spawn logic
+  spawnTimer += 500;
+  if(stars.length < maxStars) spawnStar();
+  if(Math.random() < 0.35) spawnEnemy();
+  setTimeout(gameLoopTick, spawnInterval);
+}
+
+/* responsive canvas scaling */
+function fitCanvas(){
+  const container = document.getElementById('game-area');
+  const maxW = Math.min(900, window.innerWidth - 40);
+  const scale = Math.min(1, maxW / W);
+  canvas.style.transform = 'scale(' + scale + ')';
+  canvas.style.transformOrigin = 'top left';
+  container.style.height = (H*scale) + 'px';
+}
+window.addEventListener('resize', fitCanvas);
+fitCanvas();
+
+resetGame();
+requestAnimationFrame(loop);
+gameLoopTick();
+</script>
+</body>
+</html>
